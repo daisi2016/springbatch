@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hx.data.center.mapper.GeneralCustMapper">
+
+	<select id="getCIFCustNum" resultType="long">
+		select count(1)
+		from SRC_CIF3.TKHXX@crm a ,SRC_CIF3.TYWZH@crm b where a.khh=b.khh  and a.ZJBH is not null
+	</select>
+	<select id="getCIFCustPagesize"
+		resultType="com.hx.data.center.entity.GeneralCifCustBo">
+		select khh custNo,khjc name,KHMC fullName,ZJLB certType,ZJBH
+		certNo,YMTH ymt,KHZT status,KHLB custType,ywxt sysType from ( select
+		a.khh,a.khjc,a.KHMC,a.ZJLB,a.ZJBH,a.YMTH,a.KHZT,a.KHLB,b.ywxt ,rownum
+		rwn from SRC_CIF3.TKHXX@crm a ,SRC_CIF3.TYWZH@crm b where a.khh=b.khh and 
+		a.ZJBH is not null  <![CDATA[ and rownum <#{end} ]]>
+		order by a.khh )
+      <![CDATA[ where rwn >=#{start} ]]>
+	</select>
+
+	<select id="getCIFCust"
+			resultType="com.hx.data.center.entity.GeneralCifCustBo" parameterType="map">
+		select khh custNo,khjc name,KHMC fullName,ZJLB certType,ZJBH
+		certNo,YMTH ymt,KHZT status,KHLB custType,ywxt sysType from ( select
+		a.khh,a.khjc,a.KHMC,a.ZJLB,a.ZJBH,a.YMTH,a.KHZT,a.KHLB,b.ywxt ,rownum
+		rwn from SRC_CIF3.TKHXX@crm a ,SRC_CIF3.TYWZH@crm b where a.khh=b.khh and
+		a.ZJBH is not null  <![CDATA[ and rownum <=(#{_pagesize} + #{_skiprows})]]>
+		order by a.khh )
+      <![CDATA[ where rwn >#{_skiprows} ]]>
+	</select>
+	
+	<select id="getCrmCustNum" resultType="long">
+		select count(1)  from DSC_BAS.T_KHXX@crm
+	</select>
+	<select id="getCrmCustPagesize"
+		resultType="com.hx.data.center.entity.GeneralCifCustBo">
+		select  custNo, name, fullName, certType, certNo, custType from(
+		select khh custNo,KHXM name,KHQC fullName,ZJLB certType,ZJBH 
+		certNo,GRJG custType,rownum rwn from DSC_BAS.T_KHXX@crm where  <![CDATA[  rownum <#{end} ]]>
+		order by khh )
+      <![CDATA[ where rwn >=#{start} ]]>
+	</select>
+	
+	<select id="getGeneralCust"
+		parameterType="com.hx.data.center.entity.GeneralCifCustBo"
+		resultType="com.hx.data.center.entity.GeneralCustBo">
+		select a.cust_id custId,
+		a.full_name fullName,
+		a.cert_type certType,
+		a.cert_no certNo,
+		a.ymt ymt,
+		a.cust_type custType,
+		b.ID relId,
+		b.cust_no custNo,
+		b.sys_type sysType
+		from G_CUST_INFO a, G_CUST_INFO_REL b
+		where (a.full_name = #{generalCifCustBo.fullName} and a.cert_type =
+		#{generalCifCustBo.certType} and a.cert_no =
+		#{generalCifCustBo.certNo} 
+		<if test="generalCifCustBo.ymt!=null and generalCifCustBo.ymt!=''">
+		 or a.ymt = #{generalCifCustBo.ymt}
+		</if>
+		 )
+		and a.cust_id = b.cust_id  
+	</select>
+	<select id="getGeneralCustDetail"
+			parameterType="map"
+			resultType="com.hx.data.center.entity.GeneralCustBo">
+		select a.cust_id custId,
+		a.full_name fullName,
+		a.cert_type certType,
+		a.cert_no certNo,
+		a.ymt ymt,
+		a.cust_type custType,
+		b.ID relId,
+		b.cust_no custNo,
+		b.sys_type sysType
+		from G_CUST_INFO a, G_CUST_INFO_REL b
+		where (a.full_name = #{generalCifCustBo.fullName} and a.cert_type =
+		#{generalCifCustBo.certType} and a.cert_no =
+		#{generalCifCustBo.certNo}
+		<if test="generalCifCustBo.ymt!=null and generalCifCustBo.ymt!=''">
+			or a.ymt = #{generalCifCustBo.ymt}
+		</if>
+		)
+		and a.cust_id = b.cust_id
+	</select>
+
+	<!-- <select id="getGeneralCust"
+		parameterType="com.hx.data.center.entity.GeneralCifCustBo"
+		resultType="com.hx.data.center.entity.GeneralCustBo">
+		select a.cust_id custId,
+		a.full_name fullName,
+		a.cert_type certType,
+		a.cert_no certNo,
+		a.ymt ymt,
+		a.cust_type custType,
+		b.ID relId,
+		b.cust_no custNo,
+		b.sys_type sysType,
+		b.status status
+		from G_CUST_INFO a, G_CUST_INFO_REL b
+		where (a.full_name = #{generalCifCustBo.fullName} and a.cert_type =
+		#{generalCifCustBo.certType} and a.cert_no =
+		#{generalCifCustBo.certNo})
+		or a.ymt = #{generalCifCustBo.ymt}
+		and a.cust_id = b.cust_id  
+	</select> -->
+
+	<update id="updateGeneralCustRelationStatus"
+		parameterType="com.hx.data.center.entity.GeneralCustBo">
+		update G_CUST_INFO_REL set status=#{status},update_date =to_char(sysdate,'yyyymmdd'),update_time=to_char(sysdate,'hh24miss') where
+		id=#{relId}
+	</update>
+	<select id="getGeneralCustNo"
+		resultType="java.lang.Integer" >
+		  select SEQ_GCUST_INFO.NEXTVAL from dual   
+	</select>
+	<insert id="saveGeneralCust"
+		parameterType="com.hx.data.center.entity.GeneralCustBo">
+		insert into G_CUST_INFO(
+		cust_id,
+		full_name,
+		cert_type,
+		cert_no,
+		ymt,
+		cust_type,
+		create_date,
+		create_time,
+		update_date,
+		update_time
+		) values (
+		#{custId},
+		#{fullName},
+		#{certType},
+		#{certNo},
+		#{ymt},
+		#{custType},
+		to_char(sysdate,'yyyymmdd'),
+		to_char(sysdate,'hh24miss'),
+		to_char(sysdate,'yyyymmdd'),
+		to_char(sysdate,'hh24miss')
+		)
+	</insert>
+
+	<!-- <insert id="saveGeneralCustRelation"
+		parameterType="com.hx.data.center.entity.GeneralCustBo">
+		insert into G_CUST_INFO_REL(
+		ID,
+		cust_no,
+		sys_type,
+		status,
+		cust_id,
+		create_date,
+		create_time,
+		update_date,
+		update_time
+		) values (
+		SEQ_GCUST_INFO_REl.NEXTVAL,
+		#{custNo},
+		#{sysType},
+		#{status},
+		#{custId},
+		to_char(sysdate,'yyyymmdd'),
+		to_char(sysdate,'hh24miss'),
+		to_char(sysdate,'yyyymmdd'),
+		to_char(sysdate,'hh24miss')
+		)
+	</insert>
+ -->
+<insert id="saveGeneralCustRelation"
+		parameterType="com.hx.data.center.entity.GeneralCustBo">
+		insert into G_CUST_INFO_REL(
+		ID,
+		cust_no,
+		sys_type,
+		cust_id,
+		create_date,
+		create_time,
+		update_date,
+		update_time
+		) values (
+		SEQ_GCUST_INFO_REl.NEXTVAL,
+		#{custNo},
+		#{sysType},
+		#{custId},
+		to_char(sysdate,'yyyymmdd'),
+		to_char(sysdate,'hh24miss'),
+		to_char(sysdate,'yyyymmdd'),
+		to_char(sysdate,'hh24miss')
+		)
+	</insert>
+
+</mapper>
+
+

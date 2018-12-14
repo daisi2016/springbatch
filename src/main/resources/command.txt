@@ -1,0 +1,4 @@
+pro:nohup java -server -Xms2048M -Xmx2048M -Xss256k -jar data-center-service-1.0-SNAPSHOT.jar > start.log  &
+
+
+test: nohup java -server -Xms1024M -Xmx1024M -Xss256k -jar data-center-service-1.0-SNAPSHOT.jar > start.log  &
